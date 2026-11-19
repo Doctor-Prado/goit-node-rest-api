@@ -1,4 +1,4 @@
-import { listContacts, getContactById, removeContact, addContact, updateContact as updateContactService } from "../services/contactsServices.js";
+import { listContacts, getContactById, removeContact, addContact, updateContact as updateContactService, updateStatusContact as updateStatusContactService } from "../services/contactsServices.js";
 
 export const getAllContacts = async (req, res) => {
     const contactsList = await listContacts();
@@ -42,5 +42,20 @@ export const updateContact = async (req, res) => {
             "message": "Not found"
         })
     }
+    res.status(200).json(updatedContact);
+};
+
+export const updateStatusContact = async (req, res) => {
+    const contactId = req.params.contactId;
+    const favorite = req.body.favorite;
+
+    const updatedContact = await updateStatusContactService(contactId, { favorite });
+
+    if (updatedContact === null) {
+        return res.status(404).json({
+            message: "Not found",
+        });
+    }
+
     res.status(200).json(updatedContact);
 };
