@@ -1,5 +1,5 @@
 import express from "express";
-
+import mongoose from "mongoose";
 import {
   getAllContacts,
   getOneContact,
@@ -17,13 +17,25 @@ import {
   updateFavoriteSchema,
 } from "../schemas/contactsSchemas.js";
 
+const validateContactId = (req, res, next) => {
+  const id = req.params.id ?? req.params.contactId;
+
+  if (!mongoose.isObjectIdOrHexString(id)) {
+    return res.status(400).json({
+      message: "Invalid contact ID"
+    });
+  }
+
+  next();
+};
+
 const contactsRouter = express.Router();
 
 contactsRouter.get("/", getAllContacts);
 
-contactsRouter.get("/:id", getOneContact);
+contactsRouter.get("/:id", validateContactId, getOneContact);
 
-contactsRouter.delete("/:id", deleteContact);
+contactsRouter.delete("/:id", validateContactId, deleteContact);
 
 contactsRouter.post(
   "/",
@@ -33,12 +45,14 @@ contactsRouter.post(
 
 contactsRouter.put(
   "/:id",
+  validateContactId,
   validateBody(updateContactSchema),
   updateContact
 );
 
 contactsRouter.patch(
   "/:contactId/favorite",
+  validateContactId,
   validateBody(updateFavoriteSchema),
   updateStatusContact
 );
